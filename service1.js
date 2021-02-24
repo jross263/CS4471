@@ -16,29 +16,25 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 var table = "ServiceData";
 
 
-
-axios.get("https://financialmodelingprep.com/api/v3/gainers?apikey="+process.env.STOCK_API).then(response => {
-    var params = {
-        TableName:table,
-        Item:{
-            "UUID": uuidv4(),
-            "servie": "Service1",
-            "time": Date.now(),
-            "data":response.data
-        }
-    };
-    
-    docClient.put(params, function(err, data) {
-        if (err) {
-            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-        } else {
-            console.log("Added item:", JSON.stringify(data, null, 2));
-        }
-    });
-}).catch(error => console.log(error));
- 
-// ///Everyday at midnight
-// cron.schedule('0 0 * * *', () => {
-
-
-// });
+///Everyday at midnight
+cron.schedule('* * * * *', () => {
+    axios.get("https://financialmodelingprep.com/api/v3/gainers?apikey="+process.env.STOCK_API).then(response => {
+        var params = {
+            TableName:table,
+            Item:{
+                "UUID": uuidv4(),
+                "service": "Service1",
+                "time": Date.now(),
+                "data":response.data
+            }
+        };
+        
+        docClient.put(params, function(err, data) {
+            if (err) {
+                console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+            } else {
+                console.log("Added item:", JSON.stringify(data, null, 2));
+            }
+        });
+    }).catch(error => console.log(error));
+});
