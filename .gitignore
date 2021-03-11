@@ -73,8 +73,11 @@ node_modules
 jspm_packages
 typings
 
+backend/config.json
+
 # Optional npm cache directory
 .npm
 
 # Optional REPL history
 .node_repl_history
+backend/config.json
