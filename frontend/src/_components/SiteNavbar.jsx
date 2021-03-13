@@ -39,8 +39,11 @@ const SiteNavbar = ({ children }) => {
                   All Services
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item href="/admin">
+                <NavDropdown.Item href="/manage">
                   Manage Services
+                </NavDropdown.Item>
+                <NavDropdown.Item href="/add">
+                  Add Services
                 </NavDropdown.Item>
               </NavDropdown>
             </Nav>

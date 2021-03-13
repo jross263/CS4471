@@ -8,7 +8,8 @@ import { SiteNavbar, PrivateRoute } from "../_components";
 import { HomePage } from "../HomePage";
 import { LoginPage } from "../LoginPage";
 import { RegisterPage } from "../RegisterPage";
-import { AdminPage } from "../AdminPage";
+import { ManagePage } from "../ManagePage";
+import { AddPage } from "../AddPage"
 import { ServicesPage } from "../ServicesPage";
 import { SubscriptionsPage } from "../SubscriptionsPage";
 
@@ -39,7 +40,8 @@ function App() {
             component={SubscriptionsPage}
           />
           <PrivateRoute exact path="/services" component={ServicesPage} />
-          <PrivateRoute exact path="/admin" component={AdminPage} />
+          <PrivateRoute exact path="/manage" component={ManagePage} />
+          <PrivateRoute exact path="/add" component={AddPage} />
           <Route path="/login" component={LoginPage} />
           <Route path="/register" component={RegisterPage} />
           <Redirect to="/" />

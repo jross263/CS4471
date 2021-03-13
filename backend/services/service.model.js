@@ -4,7 +4,8 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        serviceName: { type: DataTypes.STRING, allowNull: false },
+        name: { type: DataTypes.STRING, allowNull: false },
+        description: {type: DataTypes.STRING, allowNull: false},
         active: { type: DataTypes.BOOLEAN, allowNull: false },
         topic: { type: DataTypes.STRING, allowNull: false }
     };
