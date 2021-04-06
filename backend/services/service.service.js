@@ -17,9 +17,9 @@ module.exports = {
     getAll,
     getAllActive,
     getSubscriptions,
+    getData,
     subscribe,
     unsubscribe,
-    create,
     shutdown,
     start
 };
@@ -38,19 +38,9 @@ async function getSubscriptions(userId) {
     return await user.getServices({ where: { active: true } });
 }
 
-async function create(params) {
-    const topicData = await new AWS.SNS({ apiVersion: '2010-03-31' }).createTopic({ Name: uuidv4() }).promise();
-    params["topic"] = topicData.TopicArn
-    const service = await db.Service.create(params);
-    shell.mkdir('-p', `../services/${service.id}`);
-    shell.touch(`../services/${service.id}/${service.id}.js`)
-    if(service.active){
-        const {code, stdout, stderr} = await exec(`pm2 start ../services/${service.id}/${service.id}.js`)
-        if(code !== 0){
-            console.log(stderr)
-            throw 'Error starting service'
-        }
-    }
+async function getData(serviceId) {
+    const service = await getService(serviceId)
+    return await service.getDatum();
 }
 
 async function subscribe(serviceId, userId) {
@@ -75,6 +65,9 @@ async function unsubscribe(serviceId, userId) {
     if(arn === "PendingConfirmation"){
         throw 'Please confirm your subscription via email before unsubscribing!'
     }
+    if(arn === "Deleted"){
+        return await service.removeUser(user)
+    }
     await new AWS.SNS({apiVersion: '2010-03-31'}).unsubscribe({SubscriptionArn : arn}).promise();
     
     return await service.removeUser(user)
@@ -83,7 +76,7 @@ async function unsubscribe(serviceId, userId) {
 async function shutdown(id) {
     const service = await getService(id);
 
-    const {code, stdout, stderr} = await exec(`pm2 stop ../services/${service.id}/${service.id}.js`)
+    const {code, stdout, stderr} = await exec(`pm2 stop ../services/${service.name}/${service.name}.js`)
     
     if(code !== 0){
         throw 'Error shutting down service'
@@ -96,7 +89,7 @@ async function shutdown(id) {
 async function start(id) {
     const service = await getService(id);
 
-    const {code, stdout, stderr} = await exec(`pm2 start ../services/${service.id}/${service.id}.js`)
+    const {code, stdout, stderr} = await exec(`pm2 start ../services/${service.name}/${service.name}.js`)
     
     if(code !== 0){
         console.log(stderr)

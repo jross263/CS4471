@@ -27,6 +27,18 @@ export function services(state = {}, action) {
             return {
                 error: action.error
             };
+        case serviceConstants.GET_DATA_REQUEST:
+            return {
+                loading: true
+            };
+        case serviceConstants.GET_DATA_SUCCESS:
+            return {
+                currService: action.data,
+            };
+        case serviceConstants.GET_DATA_FAILURE:
+            return {
+                error: action.error
+            };
         default:
             return state
     }

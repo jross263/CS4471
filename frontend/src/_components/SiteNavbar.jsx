@@ -42,9 +42,6 @@ const SiteNavbar = ({ children }) => {
                 <NavDropdown.Item href="/manage">
                   Manage Services
                 </NavDropdown.Item>
-                <NavDropdown.Item href="/add">
-                  Add Services
-                </NavDropdown.Item>
               </NavDropdown>
             </Nav>
             <Nav>

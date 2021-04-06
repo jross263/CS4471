@@ -5,11 +5,11 @@ import { alertActions } from './';
 export const serviceActions = {
     getAllActiveAndSubscribed,
     getAll,
+    getData,
     subscribe,
     unsubscribe,
     shutdown,
-    start,
-    create
+    start
 };
 
 function getAllActiveAndSubscribed() {
@@ -58,6 +58,26 @@ function getAll(){
     function request() { return { type: serviceConstants.GET_ALL_REQUEST } }
     function success(services) { return { type: serviceConstants.GET_ALL_SUCCESS, services } }
     function failure(error) { return { type: serviceConstants.GET_ALL_FAILURE, error } }
+}
+
+function getData(id){
+    return dispatch => {
+        dispatch(request())
+        serviceService.getData(id)
+            .then(
+                data => {
+                    dispatch(success(data));
+            },
+                error => {
+                    dispatch(failure(error.toString()));
+                    dispatch(alertActions.error(error.toString()));
+                }
+            )
+    }
+
+    function request() { return { type: serviceConstants.GET_DATA_REQUEST } }
+    function success(data) { return { type: serviceConstants.GET_DATA_SUCCESS, data } }
+    function failure(error) { return { type: serviceConstants.GET_DATA_FAILURE, error } }
 }
 
 function subscribe(id) {
@@ -146,25 +166,4 @@ function start(id){
     function request() { return { type: serviceConstants.START_REQUEST } }
     function success() { return { type: serviceConstants.START_SUCCESS } }
     function failure(error) { return { type: serviceConstants.START_FAILURE, error } }
-}
-
-function create(name, description, active){
-    return dispatch => {
-        dispatch(request())
-        serviceService.create(name, description, active)
-            .then(
-                () => {
-                    dispatch(success());
-                    dispatch(alertActions.success('Service created'));
-                },
-                error => {
-                    dispatch(failure(error.toString()));
-                    dispatch(alertActions.error(error.toString()));
-                }
-            )
-    };
-
-    function request() { return { type: serviceConstants.CREATE_REQUEST } }
-    function success() { return { type: serviceConstants.CREATE_SUCCESS } }
-    function failure(error) { return { type: serviceConstants.CREATE_FAILURE, error } }
 }

@@ -8,7 +8,6 @@ const errorHandler = require('_middleware/error-handler');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
-
 // api routes
 app.use('/users', require('./users/users.controller'));
 app.use('/services', require('./services/services.controller'));

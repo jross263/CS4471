@@ -9,9 +9,9 @@ import { HomePage } from "../HomePage";
 import { LoginPage } from "../LoginPage";
 import { RegisterPage } from "../RegisterPage";
 import { ManagePage } from "../ManagePage";
-import { AddPage } from "../AddPage"
 import { ServicesPage } from "../ServicesPage";
 import { SubscriptionsPage } from "../SubscriptionsPage";
+import { DailyGainerLoser } from "../DailyGainerLoser";
 
 function App() {
   const alert = useSelector((state) => state.alert);
@@ -41,7 +41,7 @@ function App() {
           />
           <PrivateRoute exact path="/services" component={ServicesPage} />
           <PrivateRoute exact path="/manage" component={ManagePage} />
-          <PrivateRoute exact path="/add" component={AddPage} />
+          <PrivateRoute exact path="/dailygainerloser" component={DailyGainerLoser} />
           <Route path="/login" component={LoginPage} />
           <Route path="/register" component={RegisterPage} />
           <Redirect to="/" />

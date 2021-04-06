@@ -10,11 +10,10 @@ const EditServiceCard = ({ service }) => {
     return(
         <Card style={{ width: '18rem' }}>
         <Card.Body>
-            <Card.Title>{service.name}</Card.Title>
+            <Card.Title>{service.name.match(/[A-Z][a-z]+/g).join(" ")}</Card.Title>
             <Card.Text>
             {service.description}
             </Card.Text>
-            <Button variant="primary">View Service</Button>
             {service.active && <Button onClick={()=>{
                 dispatch(serviceActions.shutdown(service.id))
             }} variant="danger">Turn Off</Button>}

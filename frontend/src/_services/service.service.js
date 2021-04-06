@@ -5,11 +5,11 @@ export const serviceService = {
     getAllActive,
     getSubscribed,
     getAll,
+    getData,
     subscribe,
     unsubscribe,
     shutdown,
-    start,
-    create
+    start
 };
 
 function getAllActive() {
@@ -37,6 +37,15 @@ function getAll() {
     };
 
     return fetch(`${config.apiUrl}/services`, requestOptions).then(handleResponse);
+}
+
+function getData(id) {
+    const requestOptions = {
+        method: 'GET',
+        headers: authHeader()
+    };
+
+    return fetch(`${config.apiUrl}/services/${id}`, requestOptions).then(handleResponse);
 }
 
 function subscribe(id) {
@@ -73,16 +82,6 @@ function start(id) {
     };
 
     return fetch(`${config.apiUrl}/services/${id}/start`, requestOptions).then(handleResponse);
-}
-
-function create(name, description, active) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, active })
-    };
-
-    return fetch(`${config.apiUrl}/services`, requestOptions).then(handleResponse);
 }
 
 function handleResponse(response) {
