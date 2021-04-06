@@ -8,10 +8,12 @@ const serviceService = require('./service.service');
 router.get('/', authorize(), getAll);
 router.get('/active', authorize(), getAllActive);
 router.get('/subscriptions', authorize(), getSubscriptions)
+router.get('/:id', authorize(), getData)
 router.post('/:id/subscribe', authorize(), subscribe);
 router.post('/:id/unsubscribe', authorize(), unsubscribe);
-router.post('/', authorize(), createServiceSchema, create);
-router.put('/:id', authorize(), updateSchema, update);
+router.post('/:id/shutdown', authorize(), shutdown);
+router.post('/:id/start', authorize(), start);
+
 
 module.exports = router
 
@@ -33,18 +35,11 @@ function getSubscriptions(req, res, next) {
         .catch(next);
 }
 
-function createServiceSchema(req, res, next) {
-    const schema = Joi.object({
-        serviceName: Joi.string().required(),
-        active: Joi.boolean().required()
-    });
-    validateRequest(req, next, schema);
-}
-
-function create(req, res, next) {
-    serviceService.create(req.body)
-        .then(() => res.json({ message: 'Service creation successful' }))
+function getData(req, res, next) {
+    serviceService.getData(req.params.id)
+        .then(data => res.json(data))
         .catch(next);
+    
 }
 
 function subscribe(req, res, next) {
@@ -59,15 +54,14 @@ function unsubscribe(req, res, next) {
         .catch(next);
 }
 
-function updateSchema(req, res, next) {
-    const schema = Joi.object({
-        active: Joi.bool().empty('')
-    });
-    validateRequest(req, next, schema);
+function shutdown(req, res, next) {
+    serviceService.shutdown(req.params.id)
+        .then(() => res.json({ message: 'Service shutdown' }))
+        .catch(next);
 }
 
-function update(req, res, next) {
-    serviceService.update(req.params.id, req.body)
-        .then(service => res.json(service))
+function start(req, res, next){
+    serviceService.start(req.params.id)
+        .then(() => res.json({ message: 'Service started' }))
         .catch(next);
 }

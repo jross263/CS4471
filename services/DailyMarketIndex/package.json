@@ -1,0 +1,17 @@
+{
+  "name": "dailygmarketindex",
+  "version": "1.0.0",
+  "description": "This service gathers daily market index values.",
+  "main": "DailyGainerLoser.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "^8.2.0",
+    "node-cron": "^3.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

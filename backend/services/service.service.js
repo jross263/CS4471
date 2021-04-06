@@ -1,9 +1,11 @@
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
+const shell = require('shelljs');
 
 const config = require('config.json');
 const db = require('_helpers/db');
-const { getById } = require('../users/user.service')
+const { getById } = require('../users/user.service');
+
 
 AWS.config.update({
     accessKeyId: config.aws.snsKey,
@@ -15,18 +17,19 @@ module.exports = {
     getAll,
     getAllActive,
     getSubscriptions,
+    getData,
     subscribe,
     unsubscribe,
-    create,
-    update
+    shutdown,
+    start
 };
 
 async function getAll() {
-    return await db.Service.findAll();
+    return await db.Service.findAll({attributes: {exclude: ['topic']}});
 }
 
 async function getAllActive() {
-    return await db.Service.findAll({ where: { active: true } });
+    return await db.Service.findAll({ where: { active: true }, attributes: {exclude: ['topic']} });
 }
 
 async function getSubscriptions(userId) {
@@ -35,10 +38,9 @@ async function getSubscriptions(userId) {
     return await user.getServices({ where: { active: true } });
 }
 
-async function create(params) {
-    const topicData = await new AWS.SNS({ apiVersion: '2010-03-31' }).createTopic({ Name: uuidv4() }).promise();
-    params["topic"] = topicData.TopicArn
-    return await db.Service.create(params);
+async function getData(serviceId) {
+    const service = await getService(serviceId)
+    return await service.getDatum();
 }
 
 async function subscribe(serviceId, userId) {
@@ -60,25 +62,53 @@ async function unsubscribe(serviceId, userId) {
     const service = await getService(serviceId)
     
     const arn = await getSubscriptionArn(serviceId,userId);
+    if(arn === "PendingConfirmation"){
+        throw 'Please confirm your subscription via email before unsubscribing!'
+    }
+    if(arn === "Deleted"){
+        return await service.removeUser(user)
+    }
     await new AWS.SNS({apiVersion: '2010-03-31'}).unsubscribe({SubscriptionArn : arn}).promise();
     
     return await service.removeUser(user)
 }
 
-async function update(id, params) {
+async function shutdown(id) {
     const service = await getService(id);
-    // copy params to user and save
-    Object.assign(service, params);
-    await service.save();
 
-    return service;
+    const {code, stdout, stderr} = await exec(`pm2 stop ../services/${service.name}/${service.name}.js`)
+    
+    if(code !== 0){
+        throw 'Error shutting down service'
+    }
+
+    Object.assign(service, {active:0});
+    return await service.save();
 }
+
+async function start(id) {
+    const service = await getService(id);
+
+    const {code, stdout, stderr} = await exec(`pm2 start ../services/${service.name}/${service.name}.js`)
+    
+    if(code !== 0){
+        console.log(stderr)
+        throw 'Error starting service'
+    }
+
+    // copy params to user and save
+    Object.assign(service, {active:1});
+    return await service.save();
+}
+
 
 // helper functions
 
+const exec = (cmd) => new Promise(resolve=> shell.exec(cmd,{silent:true},(code, stdout, stderr)=>resolve({code, stdout, stderr})))
+
 async function getService(id) {
     const service = await db.Service.findByPk(id);
-    if (!service) throw 'User not found';
+    if (!service) throw 'Service not found';
     return service;
 }
 
