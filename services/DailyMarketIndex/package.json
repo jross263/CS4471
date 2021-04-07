@@ -4,9 +4,12 @@
   "description": "This service gathers daily market index values.",
   "main": "DailyGainerLoser.js",
   "dependencies": {
+    "aws-sdk": "^2.881.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
-    "node-cron": "^3.0.0"
+    "mysql2": "^2.2.5",
+    "node-cron": "^3.0.0",
+    "sequelize": "^6.6.2"
   },
   "devDependencies": {},
   "scripts": {
