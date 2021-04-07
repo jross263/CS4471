@@ -5,11 +5,12 @@ const AWS = require('aws-sdk');
 const { Sequelize, QueryTypes } = require('sequelize');
 
 AWS.config.update({
-    accessKeyId: config.AWS.snsKey,
-    secretAccessKey:config.AWS.snsSecret,
+    accessKeyId: config.aws.snsKey,
+    secretAccessKey:config.aws.snsSecret,
     region: 'us-east-2'
 });
 
+const { host, port, user, password, database } = config.database;
 const sequelize = new Sequelize(database, user, password, {host:host, dialect: 'mysql' });
 
 ///Everyday at midnight
@@ -29,7 +30,7 @@ cron.schedule('* * * * *', () => {
             const ipoData = ipoCal.data.ipoCalendar;
             sequelize
                 .query(
-                    'UPDATE data SET json = ?, updatedAt = ? WHERE ServiceId = ?',
+                    'UPDATE Data SET json = ?, updatedAt = ? WHERE ServiceId = ?',
                     {
                         replacements: [
                             JSON.stringify(ipoData),
@@ -42,7 +43,7 @@ cron.schedule('* * * * *', () => {
                 .then(() => {
                     const params = {
                         Message: 'IPO Calendar service has new data available.',
-                        TopicArn: config.AWS.ARN
+                        TopicArn: config.aws.ARN
                     };
 
                     const publishTextPromise = new AWS.SNS({

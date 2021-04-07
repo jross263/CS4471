@@ -1,33 +1,32 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const config = require('./config.json');
 const cron = require('node-cron');
 const axios = require('axios');
 const AWS = require('aws-sdk');
 const { Sequelize, QueryTypes } = require('sequelize');
 
 AWS.config.update(
-  { accessKeyId: process.env.snsKey,
-    secretAccessKey:  process.env.snsSecret,
+  { accessKeyId: config.aws.snsKey,
+    secretAccessKey:  config.aws.snsSecret,
     region: 'us-east-2' 
   });
 
-const sequelize = new Sequelize(process.env.DATABASE, process.env.USER, process.env.PASSWORD, { host: process.env.HOST, dialect: 'mysql' });
 
-
+const { host, port, user, password, database } = config.database;
+const sequelize = new Sequelize(database, user, password, {host:host, dialect: 'mysql' });
 
 ///Everyday at midnight
 cron.schedule('0 0 * * *', () => {
-  axios.get("https://financialmodelingprep.com/api/v3/quotes/index?apikey=" + process.env.STOCK_API).then(gainers => {
+  axios.get("https://financialmodelingprep.com/api/v3/quotes/index?apikey=" + config.stockApi).then(gainers => {
       const gainerData = gainers.data;
       sequelize.query('UPDATE data SET json = ?, updatedAt = ? WHERE ServiceId = ?',
         {
-          replacements: [JSON.stringify(gainerData), new Date(), process.env.SERVICE_ID],
+          replacements: [JSON.stringify(gainerData), new Date(), config.database.serviceId],
           type: QueryTypes.UPDATE
         }).then(() => {
 
           const params = {
             Message: 'Daily Market Index service has new data available.',
-            TopicArn: process.env.ARN
+            TopicArn: config.aws.ARN
           };
 
           const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();

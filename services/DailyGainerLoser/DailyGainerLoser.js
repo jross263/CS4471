@@ -1,24 +1,22 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const config = require('./config.json');
 const cron = require('node-cron');
 const axios = require('axios');
 const AWS = require('aws-sdk');
 const { Sequelize, QueryTypes } = require('sequelize');
 
 AWS.config.update(
-  { accessKeyId: process.env.snsKey,
-    secretAccessKey:  process.env.snsSecret,
+  { accessKeyId: config.aws.snsKey,
+    secretAccessKey:  config.aws.snsSecret,
     region: 'us-east-2' 
   });
 
-const sequelize = new Sequelize(process.env.DATABASE, process.env.USER, process.env.PASSWORD, { host: process.env.HOST, dialect: 'mysql' });
-
-
+const { host, port, user, password, database } = config.database;
+const sequelize = new Sequelize(database, user, password, {host:host, dialect: 'mysql' });
 
 ///Everyday at midnight
 cron.schedule('* * * * *', () => {
-  axios.get("https://financialmodelingprep.com/api/v3/gainers?apikey=" + process.env.STOCK_API).then(gainers => {
-    axios.get("https://financialmodelingprep.com/api/v3/losers?apikey=" + process.env.STOCK_API).then(losers => {
+  axios.get("https://financialmodelingprep.com/api/v3/gainers?apikey=" + config.stockApi).then(gainers => {
+    axios.get("https://financialmodelingprep.com/api/v3/losers?apikey=" + config.stockApi).then(losers => {
       const gainerData = gainers.data;
       for (let i = 0; i < gainerData.length; i++) {
         const percent = gainerData[i].changesPercentage;
@@ -33,13 +31,13 @@ cron.schedule('* * * * *', () => {
       }
       sequelize.query('UPDATE data SET json = ?, updatedAt = ? WHERE ServiceId = ?',
         {
-          replacements: [JSON.stringify(gainerData.concat(losersData)), new Date(), process.env.SERVICE_ID],
+          replacements: [JSON.stringify(gainerData.concat(losersData)), new Date(), config.stockApi],
           type: QueryTypes.UPDATE
         }).then(() => {
 
           const params = {
             Message: 'Daily Gainer Loser service has new data available.',
-            TopicArn: process.env.ARN
+            TopicArn: config.aws.ARN
           };
 
           const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();
