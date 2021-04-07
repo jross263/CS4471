@@ -1,22 +1,16 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const config = require('./config.json');
 const cron = require('node-cron');
 const axios = require('axios');
 const AWS = require('aws-sdk');
 const { Sequelize, QueryTypes } = require('sequelize');
 
 AWS.config.update({
-    accessKeyId: process.env.snsKey,
-    secretAccessKey: process.env.snsSecret,
+    accessKeyId: config.AWS.snsKey,
+    secretAccessKey:config.AWS.snsSecret,
     region: 'us-east-2'
 });
 
-const sequelize = new Sequelize(
-    process.env.DATABASE,
-    process.env.USER,
-    process.env.PASSWORD,
-    { host: process.env.HOST, dialect: 'mysql' }
-);
+const sequelize = new Sequelize(database, user, password, {host:host, dialect: 'mysql' });
 
 ///Everyday at midnight
 cron.schedule('* * * * *', () => {
@@ -25,7 +19,7 @@ cron.schedule('* * * * *', () => {
     const fhParams = {
         from: startDate.toISOString().split('T')[0],
         to: endDate.toISOString().split('T')[0],
-        token: process.env.STOCK_API
+        token: config.stockApi
     };
 
     axios
@@ -40,7 +34,7 @@ cron.schedule('* * * * *', () => {
                         replacements: [
                             JSON.stringify(ipoData),
                             new Date(),
-                            process.env.SERVICE_ID
+                            config.database.serviceId
                         ],
                         type: QueryTypes.UPDATE
                     }
@@ -48,7 +42,7 @@ cron.schedule('* * * * *', () => {
                 .then(() => {
                     const params = {
                         Message: 'IPO Calendar service has new data available.',
-                        TopicArn: process.env.ARN
+                        TopicArn: config.AWS.ARN
                     };
 
                     const publishTextPromise = new AWS.SNS({
