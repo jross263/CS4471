@@ -12,6 +12,7 @@ import { ManagePage } from "../ManagePage";
 import { ServicesPage } from "../ServicesPage";
 import { SubscriptionsPage } from "../SubscriptionsPage";
 import { DailyGainerLoser } from "../DailyGainerLoser";
+import { IpoCalendar } from "../IpoCalendar";
 
 function App() {
   const alert = useSelector((state) => state.alert);
@@ -42,6 +43,7 @@ function App() {
           <PrivateRoute exact path="/services" component={ServicesPage} />
           <PrivateRoute exact path="/manage" component={ManagePage} />
           <PrivateRoute exact path="/dailygainerloser" component={DailyGainerLoser} />
+          <PrivateRoute exact path="/ipocalendar" component={IpoCalendar} />
           <Route path="/login" component={LoginPage} />
           <Route path="/register" component={RegisterPage} />
           <Redirect to="/" />
