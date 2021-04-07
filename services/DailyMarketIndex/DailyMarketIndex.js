@@ -16,7 +16,7 @@ const sequelize = new Sequelize(process.env.DATABASE, process.env.USER, process.
 
 
 ///Everyday at midnight
-cron.schedule('* * * * *', () => {
+cron.schedule('0 0 * * *', () => {
   axios.get("https://financialmodelingprep.com/api/v3/quotes/index?apikey=" + process.env.STOCK_API).then(gainers => {
       const gainerData = gainers.data;
       sequelize.query('UPDATE data SET json = ?, updatedAt = ? WHERE ServiceId = ?',
